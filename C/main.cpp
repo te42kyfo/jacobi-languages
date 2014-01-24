@@ -1,8 +1,10 @@
 #include <sys/time.h>
 #include <iostream>
+#include <stdlib.h>
 
 const static size_t xsize = 64;
 const static size_t ysize = 32;
+const static int iters = 100000;
 
 double dtime() {
 	double tseconds = 0;
@@ -14,9 +16,15 @@ double dtime() {
 
 class Naive {
 public:
-    init() {
-        p1 = new float[xsize*ysize];
-        p2 = new float[xsize*ysize];
+    void init() {
+        if( posix_memalign ( (void**) &p1, xsize*ysize*sizeof(float), 32) != 0) {
+            std::cout << "Allocation error";
+            exit(1);
+        }
+        if( posix_memalign ( (void**) &p2, xsize*ysize*sizeof(float), 32) != 0) {
+            std::cout << "Allocation error";
+            exit(1);
+        }
         for( size_t y = 0; y < ysize; y++) {
             for( size_t x = 0; x < xsize; x++) {
                 p1[y*xsize+x] = 0;
@@ -29,24 +37,30 @@ public:
         }
     }
 
-        
+    
+    
+    void jacobi() {
 
-    jacobi() {
+        float * __restrict pp1 = (float*) __builtin_assume_aligned (p1, 16);
+        float * __restrict pp2 = (float*) __builtin_assume_aligned (p2, 16);
+
+
         for( size_t iter = 0; iter < iters; iter++) {
             for( size_t y = 1; y < ysize-1; y++) {
-                for( size_t x = 1; x < xsize-1; x++) {
-                    p1[y*xsize+x] = ( p1[y    *xsize+x+1] +
-                                      p1[y    *xsize+x-1] +
-                                      p1[(y+1)*xsize+x  ] +
-                                      p1[(y-1)*xsize+x  ]) * 0.25f;
-
+                   for( size_t x = 1; x < xsize-1; x++) {
+                       pp2[y*xsize+x] = ( pp1[(y)*xsize+x+1] +
+                                          pp1[(y)*xsize+x-1] +
+                                          pp1[(y-1)*xsize+x] +
+                                          pp1[(y+1)*xsize+x])*0.25;
+                                      
                 }
             }
-            std::swap(p1,p2);
+            std::swap(pp1,pp2);
         }
     }
         
-    float* p1, p2;
+    float* __restrict p1;
+    float* __restrict p2;
 };
 
 int main(int argc, char** argv) {
@@ -58,7 +72,10 @@ int main(int argc, char** argv) {
     double start = dtime();
     test.jacobi();
     double end = dtime();
-    std::cout << end-start << "\n";
+    
+    int flops = (xsize-2)*(ysize-2)*4*iters;
+
+    std::cout << flops/(end-start)*1.0e-6 << "\n";
 
     return 1;
 
