@@ -1,0 +1,165 @@
+
+<html>
+<head>
+<title>Test</title>
+<script type="text/javascript">
+
+function jacobi1(xsize, ysize, iters) {
+    A = []
+    B = []
+    for( y = 0; y < ysize; y++) {
+        A[y] = []
+        B[y] = []
+        for( x = 0; x < xsize; x++) {
+            A[y][x] = 0;
+            B[y][x] = 0;
+        }
+    }
+
+
+    for( x = 0; x < xsize; x++) {
+        A[0][x] = 255.0
+        A[ysize-1][x] = 255.0
+        B[0][x] = 255.0
+        B[ysize-1][x] = 255.0
+
+    }
+
+
+    var t1 = performance.now()
+    for( iter = 0; iter < iters; iter++) {
+        for( y = 1; y < ysize-1; y++) {
+            for( x = 1; x < xsize-1; x++) {
+                B[y][x] = ( A[y][x+1] +
+                            A[y][x-1] +
+                            A[y+1][x] +
+                            A[y-1][x] ) * 0.25
+            }
+        }
+        var C = A
+        A = B
+        B = C
+    }
+
+    var t2 = performance.now()
+
+    document.write(t2-t1);
+
+
+    var canvas = document.getElementById('canvas1');
+    if (canvas.getContext){
+        canvas = canvas.getContext('2d');
+        
+        var imgd = canvas.createImageData(xsize*16, ysize*16)
+        
+        var pix = imgd.data;
+
+        for( y = 0; y < ysize; y++) {
+            for( x = 0; x < xsize; x++) {
+                for( iy = 0; iy < 16; iy++) {
+                    for( ix = 0; ix < 16; ix++) {
+                        pix[( (y*xsize*16+x)*16 + iy*16*xsize+ix)*4  ] = B[y][x]; // the red channel
+                        pix[( (y*xsize*16+x)*16 + iy*16*xsize+ix)*4+3] = 255; // the alpha channel
+
+                    }
+                }                
+            }
+        }
+        
+    }
+
+   canvas.putImageData(imgd, 0, 0);
+    
+}
+
+function jacobi2(xsize,ysize, iters) {
+    A = new Array(xsize*ysize)
+    B = new Array(xsize*ysize)
+    for( y = 0; y < ysize; y++) {
+        for( x = 0; x < xsize; x++) {
+            A[y*xsize+x] = 0.0
+            B[y*xsize+x] = 0.0
+        }
+    }
+    for( x = 0; x < xsize; x++) {
+        A[0+x] = 255.0
+        A[(ysize-1)*xsize+x] = 255.0
+        B[0+x] = 255.0
+        B[(ysize-1)*xsize+x] = 255.0
+    }
+
+
+
+    var t1 = performance.now()
+    for( iter = 0; iter < iters; iter++) {
+        for( y = 1; y < ysize-1; y++) {
+            for( x = 1; x < xsize-1; x++) {
+                B[y*xsize+x] = ( A[y*xsize+x+1] +
+                                 A[y*xsize+x-1] +
+                                 A[(y+1)*xsize+x] +
+                                 A[(y-1)*xsize+x] ) * 0.25
+            }
+        }
+        var C = A
+        A = B
+        B = C
+    }
+    var t2 = performance.now()
+
+    document.write(t2-t1);
+
+    var canvas = document.getElementById('canvas1');
+    if (canvas.getContext){
+        canvas = canvas.getContext('2d');
+        
+        var imgd = canvas.createImageData(xsize*16, ysize*16)
+
+        var pix = imgd.data;
+
+        for( y = 0; y < ysize; y++) {
+            for( x = 0; x < xsize; x++) {
+                for( iy = 0; iy < 16; iy++) {
+                    for( ix = 0; ix < 16; ix++) {
+                        pix[( (y*xsize*16+x)*16 + iy*16*xsize+ix)*4  ] = B[y*xsize+x]; // the red channel
+                        pix[( (y*xsize*16+x)*16 + iy*16*xsize+ix)*4+3] = 255; // the alpha channel
+
+                    }
+                }                
+            }
+        }
+        
+    }
+
+   canvas.putImageData(imgd, 0, 0);
+   
+}
+
+
+function draw() {
+    var xsize = 64
+    var ysize = 32
+    var iters = 100000
+    
+    jacobi1(xsize,ysize,iters)
+    
+//    init1(A,B,xsize, ysize)
+
+
+
+   // document.write(counter/(t2-t1)*1.0e-3 )
+  //  output1(B, xsize, ysize)
+    
+
+}
+
+
+</script>
+
+</head>
+
+<body onload="draw();">
+
+<canvas id="canvas1" width="1024" height="512"></canvas>
+
+</body>
+</html>
