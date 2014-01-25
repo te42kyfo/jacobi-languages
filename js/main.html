@@ -5,11 +5,11 @@
 <script type="text/javascript">
 
 function jacobi1(xsize, ysize, iters) {
-    A = []
-    B = []
+    A = new Array(ysize)
+    B = new Array(ysize)
     for( y = 0; y < ysize; y++) {
-        A[y] = []
-        B[y] = []
+        A[y] = new Array(xsize)
+        B[y] = new Array(xsize)
         for( x = 0; x < xsize; x++) {
             A[y][x] = 0;
             B[y][x] = 0;
@@ -143,9 +143,9 @@ function jacobi2(xsize,ysize, iters) {
 function draw() {
     var xsize = 32
     var ysize = 16
-    var iters = 100000
+    var iters = 300000
     
-    jacobi1(xsize,ysize,iters)
+    jacobi2(xsize,ysize,iters)
     
 //    init1(A,B,xsize, ysize)
 

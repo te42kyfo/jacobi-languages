@@ -4,7 +4,7 @@
 
 const static size_t xsize = 32;
 const static size_t ysize = 16;
-const static int iters = 1000000;
+const static int iters = 300000;
 
 double dtime() {
 	double tseconds = 0;
