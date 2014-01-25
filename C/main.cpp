@@ -2,9 +2,9 @@
 #include <iostream>
 #include <stdlib.h>
 
-const static size_t xsize = 64;
-const static size_t ysize = 32;
-const static int iters = 100000;
+const static size_t xsize = 32;
+const static size_t ysize = 16;
+const static int iters = 1000000;
 
 double dtime() {
 	double tseconds = 0;
@@ -14,17 +14,15 @@ double dtime() {
 	return tseconds;
 }
 
-class Naive {
+class Aligned {
 public:
     void init() {
-        if( posix_memalign ( (void**) &p1, xsize*ysize*sizeof(float), 32) != 0) {
-            std::cout << "Allocation error";
-            exit(1);
-        }
-        if( posix_memalign ( (void**) &p2, xsize*ysize*sizeof(float), 32) != 0) {
-            std::cout << "Allocation error";
-            exit(1);
-        }
+        
+        p1 = (float*) malloc (xsize*ysize*sizeof(float)+16) ;
+        p2 = (float*) malloc (xsize*ysize*sizeof(float)+16) ;
+        p1 += (( 16 - (size_t) p1%16 ) - 4)/4;
+        p2 += (( 16 - (size_t) p2%16 ) - 4)/4;
+
         for( size_t y = 0; y < ysize; y++) {
             for( size_t x = 0; x < xsize; x++) {
                 p1[y*xsize+x] = 0;
@@ -40,42 +38,93 @@ public:
     
     
     void jacobi() {
-
-        float * __restrict pp1 = (float*) __builtin_assume_aligned (p1, 16);
-        float * __restrict pp2 = (float*) __builtin_assume_aligned (p2, 16);
-
-
         for( size_t iter = 0; iter < iters; iter++) {
+            float* above = (float*) __builtin_assume_aligned
+                (p1 + 0*xsize + 1, 16);
+            float* center = (float*) __builtin_assume_aligned
+                (p1 + 1*xsize +1, 16);
+            float* below = (float*) __builtin_assume_aligned
+                (p1 + 2*xsize+1, 16);
+            float* dst = (float*) __builtin_assume_aligned
+                (p2 + 1*xsize+1, 16);
+
+
             for( size_t y = 1; y < ysize-1; y++) {
-                   for( size_t x = 1; x < xsize-1; x++) {
-                       pp2[y*xsize+x] = ( pp1[(y)*xsize+x+1] +
-                                          pp1[(y)*xsize+x-1] +
-                                          pp1[(y-1)*xsize+x] +
-                                          pp1[(y+1)*xsize+x])*0.25;
-                                      
+                for( size_t x = 0; x < xsize-2; x++) {
+                    dst[x] = ( center[x-1]+
+                               center[x+1] +
+                               above[x] +
+                               below[x])*0.25;
                 }
+                above += xsize;
+                center += xsize;
+                below += xsize;
+                dst += xsize;
             }
-            std::swap(pp1,pp2);
+            std::swap(p1,p2);
         }
     }
+
         
-    float* __restrict p1;
-    float* __restrict p2;
+    float* p1;
+    float* p2;
+};
+
+
+class Plain {
+public:
+    void init() {
+        
+        p1 = (float*) malloc (xsize*ysize*sizeof(float)) ;
+        p2 = (float*) malloc (xsize*ysize*sizeof(float)) ;
+        
+        for( size_t y = 0; y < ysize; y++) {
+            for( size_t x = 0; x < xsize; x++) {
+                p1[y*xsize+x] = 0;
+                p2[y*xsize+x] = 0;
+            }
+        }
+        for( size_t x = 0; x < xsize; x++) {
+            p1[0+x] = 1;
+            p2[(ysize-1)*xsize+x] = 1;
+        }
+    }
+
+    
+    
+    void jacobi() {
+        for( size_t iter = 0; iter < iters; iter++) {
+            for( size_t y = 1; y < ysize-1; y++) {
+                for( size_t x = 0; x < xsize-1; x++) {
+                    p1[y*xsize+x] = ( p2[(y+1)*xsize+x  ] +
+                                      p2[(y-1)*xsize+x  ] +
+                                      p2[(y  )*xsize+x+1] +
+                                      p2[(y  )*xsize+x-1] ) * 0.25;
+                    
+                }
+            }
+            std::swap(p1,p2);
+        }
+    }
+
+        
+    float* p1;
+    float* p2;
 };
 
 int main(int argc, char** argv) {
 
 
-    Naive test;
+    Aligned test;
 
     test.init();
     double start = dtime();
     test.jacobi();
     double end = dtime();
     
-    int flops = (xsize-2)*(ysize-2)*4*iters;
+    double flops = (xsize-2)*(ysize-2)*4.0*iters;
 
-    std::cout << flops/(end-start)*1.0e-6 << "\n";
+    std::cout << flops/(end-start)*1.0e-9 << "GFlop/s\n";
 
     return 1;
 

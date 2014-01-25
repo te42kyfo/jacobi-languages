@@ -43,7 +43,10 @@ function jacobi1(xsize, ysize, iters) {
 
     var t2 = performance.now()
 
-    document.write(t2-t1);
+
+    document.write( (xsize-2)*(ysize-2)*4.0*iters / 
+                    ((t2-t1)*1.0e-3) *1.0e-6 + "MFlop/s<br>");
+    document.write( t2-t1 + "Milliseconds");
 
 
     var canvas = document.getElementById('canvas1');
@@ -106,7 +109,9 @@ function jacobi2(xsize,ysize, iters) {
     }
     var t2 = performance.now()
 
-    document.write(t2-t1);
+    document.write( (xsize-2)*(ysize-2)*4.0*iters / 
+                    ((t2-t1)*1.0e-3) *1.0e-6 + "MFlop/s<br>");
+    document.write( t2-t1 + "Milliseconds");
 
     var canvas = document.getElementById('canvas1');
     if (canvas.getContext){
@@ -136,8 +141,8 @@ function jacobi2(xsize,ysize, iters) {
 
 
 function draw() {
-    var xsize = 64
-    var ysize = 32
+    var xsize = 32
+    var ysize = 16
     var iters = 100000
     
     jacobi1(xsize,ysize,iters)
