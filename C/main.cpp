@@ -75,47 +75,61 @@ class Plain {
 public:
     void init() {
         
-        p1 = (float*) malloc (xsize*ysize*sizeof(float)) ;
-        p2 = (float*) malloc (xsize*ysize*sizeof(float)) ;
+        A = (float*) malloc (xsize*ysize*sizeof(float)) ;
+        B = (float*) malloc (xsize*ysize*sizeof(float)) ;
+        
+        if( A == NULL || B == NULL) {
+            std::cerr << "Allocation failed\n";
+            exit(1);
+        }
         
         for( size_t y = 0; y < ysize; y++) {
             for( size_t x = 0; x < xsize; x++) {
-                p1[y*xsize+x] = 0;
-                p2[y*xsize+x] = 0;
+                A[y*xsize+x] = 0;
+                B[y*xsize+x] = 0;
             }
         }
         for( size_t x = 0; x < xsize; x++) {
-            p1[0+x] = 1;
-            p2[(ysize-1)*xsize+x] = 1;
+            A[0+x] = 1;
+            B[(ysize-1)*xsize+x] = 1;
         }
     }
 
     
     
     void jacobi() {
-        for( size_t iter = 0; iter < iters; iter++) {
-            for( size_t y = 1; y < ysize-1; y++) {
-                for( size_t x = 0; x < xsize-1; x++) {
-                    p1[y*xsize+x] = ( p2[(y+1)*xsize+x  ] +
-                                      p2[(y-1)*xsize+x  ] +
-                                      p2[(y  )*xsize+x+1] +
-                                      p2[(y  )*xsize+x-1] ) * 0.25;
-                    
+        size_t iter;
+        size_t y;
+        size_t x;
+        float *C;
+
+       
+        for( iter=1; iter < iters; iter++) {
+            for( y = 1; y < ysize-1; y++) {
+                for( x = 1; x < xsize-1; x++) {
+                    A[y*xsize+x] = ( B[(y-1)*xsize+x  ] +
+                                     B[(y+1)*xsize+x  ] +
+                                     B[(y  )*xsize+x-1] +
+                                     B[(y  )*xsize+x+1] ) * 0.25f;
                 }
             }
-            std::swap(p1,p2);
+            C = A;
+            A = B;
+            B = C;
+            //           std::swap(A,B);
         }
+
     }
 
         
-    float* p1;
-    float* p2;
+    float* __restrict A;
+    float* __restrict B;
 };
 
 int main(int argc, char** argv) {
 
 
-    Aligned test;
+    Plain test;
 
     test.init();
     double start = dtime();

@@ -7,12 +7,11 @@ public class Jacobi {
 
         int xsize = 32;
         int ysize = 16;
-        int iters = 100000;
-            
+        int iters = 100;
 
         float[][] A = new float[ysize][xsize];
         float[][] B = new float[ysize][xsize];
-        
+        float[][] C;
         for( int y = 0; y < ysize;y++) {
             for( int x = 0; x < xsize;x++) {
                 A[y][x] = 0;
@@ -32,12 +31,15 @@ public class Jacobi {
         for(int iter=1; iter < iters; iter++) {
             for( int y = 1; y < ysize-1; y++) {
                 for( int x = 1; x < xsize-1; x++) {
-                    A[y][x] = (A[y-1][x] +
-                               A[y+1][x] +
-                               A[y][x-1] +
-                               A[y][x+1]) * 0.25f;
+                    A[y][x] = ( B[y-1][x] +
+                                B[y+1][x] +
+                                B[y][x-1] +
+                                B[y][x+1]) * 0.25f;
                 }
-            }   
+            }
+            C = A;
+            A = B;
+            B = C;
         }
         long walltime = System.nanoTime() - startTime;
         double flops = (xsize-2)*(ysize-2)*iters*4.0 / 

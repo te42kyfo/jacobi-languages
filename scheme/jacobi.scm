@@ -16,6 +16,6 @@
                                        (f32vector-ref data (1- index))
                                        (f32vector-ref data (+  index xsize))
                                        (f32vector-ref data (-  index xsize)))))))))))
-(jacobi-iterate (* 10 100))
+(jacobi-iterate (* 100 100))
 
 
