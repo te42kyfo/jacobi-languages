@@ -44,7 +44,7 @@ function jacobi1(xsize, ysize, iters) {
     var t2 = performance.now()
 
 
-    document.write( (xsize-2)*(ysize-2)*4.0*iters / 
+    document.write( (xsize-2)*(ysize-2)*4.0*iters /
                     ((t2-t1)*1.0e-3) *1.0e-6 + "MFlop/s<br>");
     document.write( t2-t1 + "Milliseconds");
 
@@ -52,9 +52,9 @@ function jacobi1(xsize, ysize, iters) {
     var canvas = document.getElementById('canvas1');
     if (canvas.getContext){
         canvas = canvas.getContext('2d');
-        
+
         var imgd = canvas.createImageData(xsize*16, ysize*16)
-        
+
         var pix = imgd.data;
 
         for( y = 0; y < ysize; y++) {
@@ -65,14 +65,14 @@ function jacobi1(xsize, ysize, iters) {
                         pix[( (y*xsize*16+x)*16 + iy*16*xsize+ix)*4+3] = 255; // the alpha channel
 
                     }
-                }                
+                }
             }
         }
-        
+
     }
 
    canvas.putImageData(imgd, 0, 0);
-    
+
 }
 
 function jacobi2(xsize,ysize, iters) {
@@ -109,14 +109,14 @@ function jacobi2(xsize,ysize, iters) {
     }
     var t2 = performance.now()
 
-    document.write( (xsize-2)*(ysize-2)*4.0*iters / 
+    document.write( (xsize-2)*(ysize-2)*4.0*iters /
                     ((t2-t1)*1.0e-3) *1.0e-6 + "MFlop/s<br>");
     document.write( t2-t1 + "Milliseconds");
 
     var canvas = document.getElementById('canvas1');
     if (canvas.getContext){
         canvas = canvas.getContext('2d');
-        
+
         var imgd = canvas.createImageData(xsize*16, ysize*16)
 
         var pix = imgd.data;
@@ -129,31 +129,31 @@ function jacobi2(xsize,ysize, iters) {
                         pix[( (y*xsize*16+x)*16 + iy*16*xsize+ix)*4+3] = 255; // the alpha channel
 
                     }
-                }                
+                }
             }
         }
-        
+
     }
 
    canvas.putImageData(imgd, 0, 0);
-   
+
 }
 
 
 function draw() {
-    var xsize = 32
-    var ysize = 16
-    var iters = 300000
-    
+    var xsize = 256
+    var ysize = 128
+    var iters = 100000
+
     jacobi1 (xsize,ysize,iters)
-    
+
 //    init1(A,B,xsize, ysize)
 
 
 
    // document.write(counter/(t2-t1)*1.0e-3 )
   //  output1(B, xsize, ysize)
-    
+
 
 }
 

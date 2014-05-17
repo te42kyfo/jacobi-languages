@@ -5,9 +5,9 @@ public class Jacobi {
     public static void main(String[] args) {
                
 
-        int xsize = 32;
-        int ysize = 16;
-        int iters = 100;
+        int xsize = 256;
+        int ysize = 128;
+        int iters = 1000000;
 
         float[][] A = new float[ysize][xsize];
         float[][] B = new float[ysize][xsize];
@@ -25,7 +25,7 @@ public class Jacobi {
             B[0][x] = 1;
             B[ysize-1][x] = 1;
         }
-        
+
 
         long startTime = System.nanoTime();    
         for(int iter=1; iter < iters; iter++) {
